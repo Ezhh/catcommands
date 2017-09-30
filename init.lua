@@ -64,7 +64,7 @@ minetest.register_chatcommand("slowmo", {
     func = function(name, target)
         local player = minetest.get_player_by_name(target)
         if player == nil then
-            minetest.chat_send_player(name,"Player does not exist") 
+            minetest.chat_send_player(name,"Player does not exist")
             return
         end
         slowmo(name,target)
@@ -194,7 +194,7 @@ minetest.register_chatcommand("setfree",{
     description = "Reset player movement.",
     func = function(name, target)
         local player = minetest.get_player_by_name(target)
-        if player == nil then 
+        if player == nil then
             minetest.chat_send_player(name,"Player does not exist")
             return
         end
@@ -251,12 +251,23 @@ minetest.register_on_shutdown(function()
 end)
 
 
+local quotes = {
+    "Put... the bunny... back... in the box.",
+    "What do you think I'm gonna do? I'm gonna save the beepin' day!",
+    "Well, today's your lucky day, 'cause I brought an eagle.",
+    "I'm so sorry I dropped you - I had to save the Declaration!",
+}
+
 -- put a player in the cage
 minetest.register_chatcommand("cage", {
     params = "<person>",
     privs = {secret=true},
     description = "Put a player in the cage.",
     func = function(warden_name, target_name)
+        if target_name:lower():sub(1, 3) == "nic" then
+            minetest.chat_send_player(warden_name, quotes[math.random(0, #quotes - 1)] .. " - Cage, Nic")
+        end
+
         --prevent self-caging
         if warden_name == target_name then
             minetest.chat_send_player(warden_name,"You can't cage yourself")
@@ -381,11 +392,10 @@ minetest.register_chatcommand("proclaim", {
             return
         end
         minetest.chat_send_all(text)
-        if minetest.get_modpath("irc") then 
+        if minetest.get_modpath("irc") then
             if irc.connected and irc.config.send_join_part then
                 irc:say(text)
             end
         end
     end
 })
-
