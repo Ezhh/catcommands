@@ -5,33 +5,44 @@ local default_sneak_mode = "old" -- change this to "new" if you want new movemen
 
 -- Admin Curses
 -- Cursed with eternal daylight
-local function pday(user, target)
-	local player = minetest.get_player_by_name(target)
-    player:set_attribute("tanning", "true")
-    player:override_day_night_ratio(1)
-  end
+	local function pday(name, target, value)
+		local player = minetest.get_player_by_name(target)
+		player:set_attribute("tanning", value)
+		player:override_day_night_ratio(value)
+	end
 
-minetest.register_chatcommand("pday", {
-  params = "<person>",
-	privs = {secret=true},
-  description = "Set day permanently for a player",
-  func = function(name, target)
-    local player = minetest.get_player_by_name(target)
-      if player == nil then
-        return false, "Player does not exist!"
-      end
-  pday(name, target)
-	minetest.chat_send_player(target, "Cursed by an admin! Eternal daylight!")
-	minetest.chat_send_player(name, "Curse successful!")
-end
-})
+	minetest.register_chatcommand("pday", {
+		params = "<person> <value>",
+		privs = {secret = true},
+		description = "Set a player's day/night ratio",
 
--- prevents player from jumping
-local function hobble(user, target)
-	local player = minetest.get_player_by_name(target)
-	player:set_attribute("hobbled", "true")
-	player:set_physics_override({jump = 0})
-end
+		func = function(name, params)
+			local target, value = params:match("^(%S+)%s*([%d.]*)$")
+			if target == nil or target == "" then
+				return false, "You must enter a player name, optionally followed by a number."
+			end
+
+			local player = minetest.get_player_by_name(target)
+			if player == nil then
+				return false, "Player does not exist."
+			end
+
+			if value == nil or value == "" or
+					tonumber(value) > 1.0 or tonumber(value) < 0.1 or not string.match(value, '[0-9]') then
+				value = "1"
+			end
+
+			pday(name, target, value)
+			if tonumber(value) >= .5 then
+			minetest.chat_send_player(target, "Cursed by an admin! Eternal Daylight!")
+			minetest.chat_send_player(name, "Curse successful! "..target.."'s light ratio set to "..value)
+		end
+			if tonumber(value) < .5 then
+				minetest.chat_send_player(target, "Cursed by an admin! Eternal Nighttime!")
+				minetest.chat_send_player(name, "Curse successful! "..target.."'s light ratio set to "..value)
+		end
+	end
+	})
 
 minetest.register_chatcommand("hobble", {
 	params = "<person>",
