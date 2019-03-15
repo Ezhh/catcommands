@@ -28,7 +28,7 @@ local default_sneak_mode = "old" -- change this to "new" if you want new movemen
 			end
 
 			if value == nil or value == "" or
-					tonumber(value) > 1.0 or tonumber(value) < 0.1 or not string.match(value, '[0-9]') then
+					tonumber(value) > 1.0 or tonumber(value) < 0.1 then
 				value = "1"
 			end
 
