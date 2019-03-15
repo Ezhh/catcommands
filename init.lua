@@ -4,6 +4,27 @@ minetest.register_privilege("hidden_one", {description = "Can hide from players.
 local default_sneak_mode = "old" -- change this to "new" if you want new movement.
 
 -- Admin Curses
+-- Cursed with eternal daylight
+local function pday(user, target)
+	local player = minetest.get_player_by_name(target)
+    player:set_attribute("tanning", "true")
+    player:override_day_night_ratio(1)
+  end
+
+minetest.register_chatcommand("pday", {
+  params = "<person>",
+	privs = {secret=true},
+  description = "Set day permanently for a player",
+  func = function(name, target)
+    local player = minetest.get_player_by_name(target)
+      if player == nil then
+        return false, "Player does not exist!"
+      end
+  pday(name, target)
+	minetest.chat_send_player(target, "Cursed by an admin! Eternal daylight!")
+	minetest.chat_send_player(name, "Curse successful!")
+end
+})
 
 -- prevents player from jumping
 local function hobble(user, target)
@@ -144,12 +165,14 @@ minetest.register_on_joinplayer(function(player)
 	if player:get_attribute("frozen") == "true" then
 		freeze(name,name)
 	end
+	if player:get_attribute("tanning") == "true" then
+		pday(name, name)
 	if player:get_attribute("lost") == "true" then
 		getlost(name,name)
 	end
 	if player:get_attribute("blind") == "true" then
 		blind(name,name)
-	end	
+	end
 	-- set sneak mode if unassigned
 	if player:get_attribute("sneak_mode") == nil then
 		player:set_attribute("sneak_mode", default_sneak_mode)
@@ -162,7 +185,7 @@ minetest.register_on_joinplayer(function(player)
 	elseif player:get_attribute("sneak_mode") == "none" then
 		player:set_physics_override({sneak = false})
 	end
-end)
+end
 
 -- reset player physics
 minetest.register_chatcommand("setfree",{
@@ -171,13 +194,14 @@ minetest.register_chatcommand("setfree",{
 	description = "Reset player movement.",
 	func = function(name, target)
 		local player = minetest.get_player_by_name(target)
-		if player == nil then 
+		if player == nil then
 			return false, "Player does not exist."
 		end
 		player:set_attribute("hobbled", "")
 		player:set_attribute("slowed", "")
 		player:set_attribute("frozen", "")
 		player:set_attribute("lost", "")
+		player:set_attribute("tanning", "")
 		player:set_attribute("blind", "")
 		player:set_physics_override({jump = 1, speed = 1, sneak = true})
 		player:hud_set_flags({minimap = true})
@@ -209,7 +233,7 @@ minetest.register_chatcommand("set_sneak",{
 			return false, "Must include player name and sneak mode."
 		end
 		local player = minetest.get_player_by_name(target)
-		if not player then 
+		if not player then
 			return false, "Player does not exist."
 		end
 		if not mode or (mode ~= "old" and mode ~= "new" and mode ~= "none") then
@@ -227,11 +251,11 @@ minetest.register_chatcommand("curses",{
 	description = "Check player status.",
 	func = function(user_name, target_name)
 		local player = minetest.get_player_by_name(target_name)
-		if player == nil then 
+		if player == nil then
 			return false, "Player does not exist or is not logged in."
 		end
 		local result = "Status for player "..target_name..": "
-		local status_list = {"hobbled", "slowed", "frozen", "lost", "blind", "caged"}
+		local status_list = {"hobbled", "slowed", "frozen", "lost", "blind", "caged", "tanning"}
 		for i, status in ipairs(status_list) do
 			if player:get_attribute(status_list[i]) == "true" then
 				result = result..status_list[i].." "
@@ -353,11 +377,13 @@ minetest.register_chatcommand("proclaim", {
 			return
 		end
 		minetest.chat_send_all(text)
-		if minetest.get_modpath("irc") then 
+		if minetest.get_modpath("irc") then
 			if irc.connected and irc.config.send_join_part then
 				irc:say(text)
 			end
 		end
 	end
-})
-
+}
+)
+end
+)
