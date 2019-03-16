@@ -4,7 +4,7 @@ minetest.register_privilege("hidden_one", {description = "Can hide from players.
 local default_sneak_mode = "old" -- change this to "new" if you want new movement.
 
 -- Admin Curses
--- Cursed with eternal daylight
+-- Cursed with eternal day or night
 	local function pday(name, target, value)
 		local player = minetest.get_player_by_name(target)
 		player:override_day_night_ratio(value)
