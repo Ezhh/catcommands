@@ -77,7 +77,12 @@ end
 	end
 	end
 	})
-
+	-- prevents player from jumping
+	local function hobble(user, target)
+		local player = minetest.get_player_by_name(target)
+		player:set_attribute("hobbled", "true")
+		player:set_physics_override({jump = 0})
+	end
 	minetest.register_chatcommand("hobble", {
 	params = "<person>",
 	privs = {secret=true},
@@ -87,7 +92,7 @@ end
 	if player == nil then
 		return false, "Player does not exist."
 	end
-	hobble(name, target)
+	 hobble(name, target)
 	minetest.chat_send_player(target, "Cursed by an admin! No more jumping!")
 	minetest.chat_send_player(name, "Curse successful!")
 	end
@@ -274,7 +279,7 @@ end
 		return false, "Player does not exist or is not logged in."
 	end
 	local result = "Status for player "..target_name..": "
-	local status_list = {"hobbled", "slowed", "frozen", "lost", "blind", "caged", "tanning"}
+	local status_list = {"hobbled", "slowed", "frozen", "lost", "blind", "caged", "tanning", "transformed"}
 	for i, status in pairs(status_list) do
 		if player:get_attribute(status_list[i]) == "true" then
 			result = result..status_list[i].." "
