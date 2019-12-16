@@ -4,6 +4,40 @@ minetest.register_privilege("hidden_one", {description = "Can hide from players.
 local default_sneak_mode = "old" -- change this to "new" if you want new movement.
 
 -- Admin Curses
+
+
+--Turn player into a chicken
+
+local function transmogrify(name, target)
+local pos = {}
+local player = minetest.get_player_by_name(target)
+local pos = player:getpos()
+local ppos = {x=pos.x, y=pos.y+1, z=pos.z}
+player:set_attribute("transformed", "true")
+player:set_properties({mesh = "catchicken.b3d",
+collisionbox = {-0.3, -0.75, -0.3, 0.3, 0.1, 0.3},
+    textures = {"catchicken.png"}})
+		player:setpos(ppos)
+end
+
+minetest.register_chatcommand("transmogrify", {
+params = "<person>",
+privs = {secret=true},
+description = "Turn player into a chicken.",
+func = function(name, target)
+local player = minetest.get_player_by_name(target)
+if player == nil then
+	return false, "Player does not exist."
+end
+transmogrify(name, target)
+minetest.chat_send_player(target, "Cursed by an admin! You are now a chicken! Bawk! Bawk!")
+minetest.chat_send_player(name, "Curse successful!")
+end
+})
+
+
+
+
 -- Cursed with eternal day or night
 	local function pday(name, target, value)
 		local player = minetest.get_player_by_name(target)
@@ -184,9 +218,13 @@ local default_sneak_mode = "old" -- change this to "new" if you want new movemen
 	player:set_attribute("lost", "")
 	player:set_attribute("tanning", "")
 	player:set_attribute("blinded", "")
+	player:set_attribute("transformed", "")
 	player:set_physics_override({jump = 1, speed = 1, sneak = true})
 	player:hud_set_flags({minimap = true})
 	player:override_day_night_ratio(nil)
+	player:set_properties({mesh = "character.b3d",
+	collisionbox = {-0.35, -1, -0.35, 0.35, 1, 0.35},
+	    textures = {"character.png"}})
 	minetest.chat_send_player(target, "The curse is lifted. You have been set free!")
 	minetest.chat_send_player(name, "The curse is lifted.")
 	end
